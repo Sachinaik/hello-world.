@@ -20,7 +20,19 @@ export function ProjectFormDialog({
   const [category, setCategory] = useState(project?.category ?? '')
   const [color, setColor] = useState(project?.color ?? COLOR_OPTIONS[0])
   const [tagsText, setTagsText] = useState('')
+  const [startDate, setStartDate] = useState(
+    project?.startedAt ? new Date(project.startedAt).toISOString().slice(0, 10) : ''
+  )
+  const [completedDate, setCompletedDate] = useState(
+    project?.completedAt ? new Date(project.completedAt).toISOString().slice(0, 10) : ''
+  )
   const [saving, setSaving] = useState(false)
+
+  function dateStringToEpoch(value: string): number | null {
+    if (!value) return null
+    const [y, m, d] = value.split('-').map(Number)
+    return new Date(y, m - 1, d).getTime()
+  }
 
   useEffect(() => {
     if (project) {
@@ -54,7 +66,9 @@ export function ProjectFormDialog({
           name: name.trim(),
           description: description || null,
           category: category || null,
-          color
+          color,
+          startedAt: dateStringToEpoch(startDate),
+          completedAt: dateStringToEpoch(completedDate)
         })
         savedProjectId = project.id
         notify('Project updated')
@@ -63,7 +77,8 @@ export function ProjectFormDialog({
           name: name.trim(),
           description: description || null,
           category: category || null,
-          color
+          color,
+          startedAt: dateStringToEpoch(startDate)
         })
         savedProjectId = created.id
         notify('Project created')
@@ -118,6 +133,28 @@ export function ProjectFormDialog({
           />
           <span className="mt-1 block text-xs text-slate-400">Comma-separated</span>
         </label>
+        <div className="flex gap-3">
+          <label className="flex-1 text-sm">
+            <span className="mb-1 block font-medium text-slate-700 dark:text-slate-300">Start date (optional)</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800"
+            />
+          </label>
+          <label className="flex-1 text-sm">
+            <span className="mb-1 block font-medium text-slate-700 dark:text-slate-300">
+              Completion date (optional)
+            </span>
+            <input
+              type="date"
+              value={completedDate}
+              onChange={(e) => setCompletedDate(e.target.value)}
+              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800"
+            />
+          </label>
+        </div>
         <div>
           <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Color</span>
           <div className="flex gap-2">
