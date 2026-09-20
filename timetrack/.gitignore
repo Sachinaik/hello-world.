@@ -11,6 +11,7 @@ npm-debug.log*
 coverage/
 *.local
 .vite/
+*.tsbuildinfo
 
 # App runtime data (SQLite files, backups) should never be committed
 *.sqlite3
