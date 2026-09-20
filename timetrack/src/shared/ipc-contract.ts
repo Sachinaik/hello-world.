@@ -127,6 +127,7 @@ export interface IpcApi {
   }
   tags: {
     list(): Promise<Tag[]>
+    listForProject(projectId: number): Promise<Tag[]>
     create(name: string): Promise<Tag>
     setForProject(projectId: number, tagIds: number[]): Promise<void>
   }
@@ -192,6 +193,7 @@ export const IPC_CHANNELS = {
   'dashboard:summary': 'dashboard:summary',
   'reports:totals': 'reports:totals',
   'tags:list': 'tags:list',
+  'tags:listForProject': 'tags:listForProject',
   'tags:create': 'tags:create',
   'tags:setForProject': 'tags:setForProject',
   'settings:getAll': 'settings:getAll',

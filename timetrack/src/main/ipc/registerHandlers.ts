@@ -147,6 +147,7 @@ export function registerIpcHandlers(db: Database.Database, shortcutManager: Shor
 
   // ---- Tags ----
   h(IPC_CHANNELS['tags:list'], () => tagsRepo.listTags(db))
+  h(IPC_CHANNELS['tags:listForProject'], (projectId: number) => tagsRepo.listTagsForProject(db, projectId))
   h(IPC_CHANNELS['tags:create'], (name: string) => tagsRepo.createTag(db, name))
   h(IPC_CHANNELS['tags:setForProject'], (projectId: number, tagIds: number[]) =>
     tagsRepo.setTagsForProject(db, projectId, tagIds)

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Project } from '@shared/types'
 import { Modal } from './Modal'
 import { useToast } from './Toast'
@@ -19,12 +19,36 @@ export function ProjectFormDialog({
   const [description, setDescription] = useState(project?.description ?? '')
   const [category, setCategory] = useState(project?.category ?? '')
   const [color, setColor] = useState(project?.color ?? COLOR_OPTIONS[0])
+  const [tagsText, setTagsText] = useState('')
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (project) {
+      window.api.tags.listForProject(project.id).then((tags) => setTagsText(tags.map((t) => t.name).join(', ')))
+    }
+  }, [project])
+
+  async function saveTags(projectId: number): Promise<void> {
+    const names = Array.from(
+      new Set(
+        tagsText
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      )
+    )
+    const tags = await Promise.all(names.map((name) => window.api.tags.create(name)))
+    await window.api.tags.setForProject(
+      projectId,
+      tags.map((t) => t.id)
+    )
+  }
 
   async function handleSave(): Promise<void> {
     if (!name.trim()) return
     setSaving(true)
     try {
+      let savedProjectId: number
       if (project) {
         await window.api.projects.update(project.id, {
           name: name.trim(),
@@ -32,16 +56,19 @@ export function ProjectFormDialog({
           category: category || null,
           color
         })
+        savedProjectId = project.id
         notify('Project updated')
       } else {
-        await window.api.projects.create({
+        const created = await window.api.projects.create({
           name: name.trim(),
           description: description || null,
           category: category || null,
           color
         })
+        savedProjectId = created.id
         notify('Project created')
       }
+      await saveTags(savedProjectId)
       onSaved()
       onClose()
     } catch (err) {
@@ -80,6 +107,16 @@ export function ProjectFormDialog({
             placeholder="e.g. Grant writing, Research"
             className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800"
           />
+        </label>
+        <label className="text-sm">
+          <span className="mb-1 block font-medium text-slate-700 dark:text-slate-300">Tags (optional)</span>
+          <input
+            value={tagsText}
+            onChange={(e) => setTagsText(e.target.value)}
+            placeholder="e.g. grant, priority, collaborative"
+            className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800"
+          />
+          <span className="mt-1 block text-xs text-slate-400">Comma-separated</span>
         </label>
         <div>
           <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Color</span>

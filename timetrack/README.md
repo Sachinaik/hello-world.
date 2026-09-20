@@ -90,6 +90,12 @@ steps:
 npm run pack
 ```
 
+**This must be run on macOS.** `electron-builder` can assemble an `.app` bundle's structure and
+Info.plist on any host, but `better-sqlite3`'s native binary is platform-specific — a copy built
+on Linux (as `npm install`'s postinstall would produce there) will be a Linux `.node` file and the
+app will not launch on a real Mac. Building on macOS itself ensures the native module, downloaded
+Electron binaries, and code signing all target Darwin correctly.
+
 ### App icon
 
 `build/icon.png` (1024×1024, included) is the source icon. `electron-builder` generates the

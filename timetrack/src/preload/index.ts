@@ -92,6 +92,8 @@ const api: IpcApi = {
   },
   tags: {
     list: () => invoke(IPC_CHANNELS['tags:list']) as ReturnType<IpcApi['tags']['list']>,
+    listForProject: (projectId) =>
+      invoke(IPC_CHANNELS['tags:listForProject'], projectId) as ReturnType<IpcApi['tags']['listForProject']>,
     create: (name) => invoke(IPC_CHANNELS['tags:create'], name) as ReturnType<IpcApi['tags']['create']>,
     setForProject: (projectId, tagIds) =>
       invoke(IPC_CHANNELS['tags:setForProject'], projectId, tagIds) as ReturnType<

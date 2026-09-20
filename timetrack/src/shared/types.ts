@@ -157,6 +157,10 @@ export interface HistoryFilter extends DateRangeFilter {
   subtaskId?: number
   entryType?: EntryType
   search?: string
+  projectStatus?: ProjectStatus
+  subtaskStatus?: SubtaskStatus
+  tagId?: number
+  hasNote?: boolean
 }
 
 export interface ReportFilter extends DateRangeFilter {

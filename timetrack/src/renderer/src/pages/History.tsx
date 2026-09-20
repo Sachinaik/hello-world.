@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { EntryType, ProjectWithTotals } from '@shared/types'
+import type { EntryType, ProjectWithTotals, Tag } from '@shared/types'
 import { formatDuration } from '@shared/duration'
 import { useAsync } from '@renderer/lib/queryClient'
 import { EmptyState } from '@renderer/components/EmptyState'
@@ -7,8 +7,11 @@ import { EntryRow } from '@renderer/components/EntryRow'
 
 export function History(): JSX.Element {
   const [projects, setProjects] = useState<ProjectWithTotals[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
   const [projectId, setProjectId] = useState<number | ''>('')
   const [entryType, setEntryType] = useState<EntryType | ''>('')
+  const [tagId, setTagId] = useState<number | ''>('')
+  const [hasNote, setHasNote] = useState(false)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [search, setSearch] = useState('')
@@ -16,6 +19,7 @@ export function History(): JSX.Element {
 
   useEffect(() => {
     window.api.projects.list().then(setProjects)
+    window.api.tags.list().then(setTags)
   }, [])
 
   const { data: groups, loading, reload } = useAsync(
@@ -23,11 +27,13 @@ export function History(): JSX.Element {
       window.api.entries.history({
         projectId: projectId || undefined,
         entryType: entryType || undefined,
+        tagId: tagId || undefined,
+        hasNote: hasNote || undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         search: search || undefined
       }),
-    [projectId, entryType, startDate, endDate, search]
+    [projectId, entryType, tagId, hasNote, startDate, endDate, search]
   )
 
   function toggle(date: string): void {
@@ -68,6 +74,24 @@ export function History(): JSX.Element {
           <option value="timer">Timer</option>
           <option value="manual">Manual</option>
         </select>
+        {tags.length > 0 && (
+          <select
+            value={tagId}
+            onChange={(e) => setTagId(e.target.value ? Number(e.target.value) : '')}
+            className="rounded-md border border-slate-200 bg-white px-3 py-1.5 dark:border-slate-600 dark:bg-slate-900"
+          >
+            <option value="">All tags</option>
+            {tags.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        )}
+        <label className="flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 dark:border-slate-600">
+          <input type="checkbox" checked={hasNote} onChange={(e) => setHasNote(e.target.checked)} />
+          Has note
+        </label>
         <input
           type="date"
           value={startDate}

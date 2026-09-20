@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import type { EntryType, SubtaskStatus, SubtaskWithTotals } from '@shared/types'
+import type { EntryType, SubtaskStatus, SubtaskWithTotals, Tag } from '@shared/types'
 import { formatDuration } from '@shared/duration'
 import { useAsync } from '@renderer/lib/queryClient'
 import { useTimerActions } from '@renderer/hooks/useTimerActions'
@@ -153,6 +153,10 @@ export function ProjectDetail(): JSX.Element {
     () => window.api.subtasks.listForProject(projectId),
     [projectId]
   )
+  const { data: tags, reload: reloadTags } = useAsync(
+    () => window.api.tags.listForProject(projectId),
+    [projectId]
+  )
 
   const [entryTypeFilter, setEntryTypeFilter] = useState<EntryType | ''>('')
   const [subtaskFilter, setSubtaskFilter] = useState<number | ''>('')
@@ -189,6 +193,7 @@ export function ProjectDetail(): JSX.Element {
     reload()
     reloadSubtasks()
     reloadEntries()
+    reloadTags()
   }
 
   async function handleMoveSubtask(subtaskId: number, direction: 'up' | 'down'): Promise<void> {
@@ -255,6 +260,18 @@ export function ProjectDetail(): JSX.Element {
           )}
           {project.category && (
             <p className="mt-1 text-xs text-slate-400">Category: {project.category}</p>
+          )}
+          {tags && tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {tags.map((t: Tag) => (
+                <span
+                  key={t.id}
+                  className="rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/30 dark:text-accent-300"
+                >
+                  #{t.name}
+                </span>
+              ))}
+            </div>
           )}
         </div>
         <div className="flex flex-wrap gap-2">

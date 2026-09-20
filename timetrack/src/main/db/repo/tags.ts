@@ -7,6 +7,18 @@ export function listTags(db: Database.Database): Tag[] {
   return rows.map(mapTag)
 }
 
+export function listTagsForProject(db: Database.Database, projectId: number): Tag[] {
+  const rows = db
+    .prepare(
+      `SELECT t.* FROM tags t
+       JOIN project_tags pt ON pt.tag_id = t.id
+       WHERE pt.project_id = ?
+       ORDER BY t.name COLLATE NOCASE`
+    )
+    .all(projectId) as TagRow[]
+  return rows.map(mapTag)
+}
+
 export function createTag(db: Database.Database, name: string): Tag {
   const existing = db.prepare(`SELECT * FROM tags WHERE name = ?`).get(name) as TagRow | undefined
   if (existing) return mapTag(existing)

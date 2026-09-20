@@ -166,10 +166,31 @@ function buildFilterClauses(filter: HistoryFilter): { clauses: string[]; params:
     clauses.push('te.entry_type = ?')
     params.push(filter.entryType)
   }
+  if (filter.projectStatus) {
+    clauses.push('p.status = ?')
+    params.push(filter.projectStatus)
+  }
+  if (filter.subtaskStatus) {
+    clauses.push('s.status = ?')
+    params.push(filter.subtaskStatus)
+  }
+  if (filter.tagId != null) {
+    clauses.push('EXISTS (SELECT 1 FROM project_tags pt WHERE pt.project_id = te.project_id AND pt.tag_id = ?)')
+    params.push(filter.tagId)
+  }
+  if (filter.hasNote != null) {
+    clauses.push(filter.hasNote ? "(te.note IS NOT NULL AND te.note != '')" : "(te.note IS NULL OR te.note = '')")
+  }
   if (filter.search) {
-    clauses.push('(p.name LIKE ? OR s.title LIKE ? OR te.note LIKE ?)')
+    clauses.push(
+      `(p.name LIKE ? OR p.description LIKE ? OR s.title LIKE ? OR s.description LIKE ? OR te.note LIKE ?
+        OR EXISTS (
+          SELECT 1 FROM project_tags pt JOIN tags t ON t.id = pt.tag_id
+          WHERE pt.project_id = te.project_id AND t.name LIKE ?
+        ))`
+    )
     const like = `%${filter.search}%`
-    params.push(like, like, like)
+    params.push(like, like, like, like, like, like)
   }
 
   return { clauses, params }
