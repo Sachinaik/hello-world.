@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3'
 import { app } from 'electron'
-import { existsSync, mkdirSync, copyFileSync } from 'fs'
+import { mkdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { runMigrations } from './migrations'
 
@@ -21,10 +21,10 @@ export function getDbPath(): string {
 }
 
 /**
- * Opens (and if necessary creates) the SQLite database, applying pragmas and
- * running migrations. If the file exists but cannot be opened (locked or
- * corrupt), it is quarantined by renaming it aside and a fresh database is
- * created, so the app never fails to launch outright.
+ * Opens (and if necessary creates) the SQLite database, applying pragmas
+ * and running migrations. Throws DatabaseOpenError on failure (locked or
+ * corrupt file) — the caller (main/index.ts) is responsible for the
+ * quarantine-and-retry recovery flow and the user-facing dialog.
  */
 export function openDatabase(): Database.Database {
   if (dbInstance) return dbInstance
@@ -49,15 +49,6 @@ export function openDatabase(): Database.Database {
 
   dbInstance = db
   return db
-}
-
-/** Quarantines a corrupt/unopenable database file so a fresh one can be created. */
-export function quarantineDatabase(dbPath: string): string {
-  const quarantinePath = `${dbPath}.corrupt-${Date.now()}`
-  if (existsSync(dbPath)) {
-    copyFileSync(dbPath, quarantinePath)
-  }
-  return quarantinePath
 }
 
 export function closeDatabase(): void {

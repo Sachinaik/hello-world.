@@ -146,6 +146,10 @@ export interface IpcApi {
   shortcuts: {
     getRegistrationErrors(): Promise<string[]>
   }
+  events: {
+    onTimerChanged(callback: () => void): () => void
+    onSleepResumeNeeded(callback: (prompt: SleepResumePrompt) => void): () => void
+  }
 }
 
 export const IPC_CHANNELS = {
@@ -200,11 +204,8 @@ export const IPC_CHANNELS = {
   'data:getDbPath': 'data:getDbPath',
   'shortcuts:getRegistrationErrors': 'shortcuts:getRegistrationErrors',
   // main -> renderer push events
-  'events:timerTick': 'events:timerTick',
   'events:timerChanged': 'events:timerChanged',
-  'events:crashRecoveryNeeded': 'events:crashRecoveryNeeded',
-  'events:sleepResumeNeeded': 'events:sleepResumeNeeded',
-  'events:quickAddRequested': 'events:quickAddRequested'
+  'events:sleepResumeNeeded': 'events:sleepResumeNeeded'
 } as const
 
 export type IpcChannel = keyof typeof IPC_CHANNELS
