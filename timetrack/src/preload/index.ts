@@ -112,6 +112,8 @@ const api: IpcApi = {
       invoke(IPC_CHANNELS['data:restoreFromFile'], sourcePath) as ReturnType<
         IpcApi['data']['restoreFromFile']
       >,
+    pickRestoreFile: () =>
+      invoke(IPC_CHANNELS['data:pickRestoreFile']) as ReturnType<IpcApi['data']['pickRestoreFile']>,
     loadSeedData: () => invoke(IPC_CHANNELS['data:loadSeedData']) as ReturnType<IpcApi['data']['loadSeedData']>,
     removeSeedData: () =>
       invoke(IPC_CHANNELS['data:removeSeedData']) as ReturnType<IpcApi['data']['removeSeedData']>,

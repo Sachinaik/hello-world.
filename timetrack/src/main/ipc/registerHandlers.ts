@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, app } from 'electron'
+import { ipcMain, BrowserWindow, app, shell, dialog } from 'electron'
 import type Database from 'better-sqlite3'
 import { IPC_CHANNELS } from '@shared/ipc-contract'
 import * as projectsRepo from '../db/repo/projects'
@@ -160,12 +160,32 @@ export function registerIpcHandlers(db: Database.Database, shortcutManager: Shor
   })
 
   // ---- Data (backup / export / import / seed) ----
-  h(IPC_CHANNELS['data:backupDatabase'], () => ({ filePath: backupDatabaseFile(db, getDbPath()) }))
+  h(IPC_CHANNELS['data:backupDatabase'], () => {
+    const filePath = backupDatabaseFile(db, getDbPath())
+    shell.showItemInFolder(filePath)
+    return { filePath }
+  })
   h(IPC_CHANNELS['data:exportJson'], () => exportJsonPayload(db))
   h(IPC_CHANNELS['data:importJson'], (payload: Parameters<typeof importJsonPayload>[1]) => {
     backupDatabaseFile(db, getDbPath())
     importJsonPayload(db, payload)
     notifyTimerChanged()
+  })
+  h(IPC_CHANNELS['data:pickRestoreFile'], async () => {
+    const win = BrowserWindow.getFocusedWindow()
+    const result = win
+      ? await dialog.showOpenDialog(win, {
+          title: 'Choose a TimeTrack backup file',
+          properties: ['openFile'],
+          filters: [{ name: 'SQLite database', extensions: ['sqlite3', 'db'] }]
+        })
+      : await dialog.showOpenDialog({
+          title: 'Choose a TimeTrack backup file',
+          properties: ['openFile'],
+          filters: [{ name: 'SQLite database', extensions: ['sqlite3', 'db'] }]
+        })
+    if (result.canceled || result.filePaths.length === 0) return null
+    return result.filePaths[0]
   })
   // Restoring replaces the database file on disk; the safest way to make
   // every in-memory reference (this connection, the timer service, the

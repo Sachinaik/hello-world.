@@ -97,7 +97,7 @@ export interface IpcApi {
     start(
       projectId: number,
       subtaskId: number | null
-    ): Promise<{ entry: TimeEntry } | { conflict: { currentLabel: string } }>
+    ): Promise<{ entry: TimeEntry } | { conflict: { projectName: string; subtaskTitle: string | null } }>
     confirmSwitchAndStart(projectId: number, subtaskId: number | null): Promise<TimeEntry>
     pause(): Promise<void>
     resume(projectId: number, subtaskId: number | null): Promise<TimeEntry>
@@ -139,6 +139,7 @@ export interface IpcApi {
     exportJson(): Promise<JsonExportPayload>
     importJson(payload: JsonExportPayload): Promise<void>
     restoreFromFile(sourcePath: string): Promise<void>
+    pickRestoreFile(): Promise<string | null>
     loadSeedData(): Promise<void>
     removeSeedData(): Promise<void>
     getDbPath(): Promise<string>
@@ -199,6 +200,7 @@ export const IPC_CHANNELS = {
   'data:exportJson': 'data:exportJson',
   'data:importJson': 'data:importJson',
   'data:restoreFromFile': 'data:restoreFromFile',
+  'data:pickRestoreFile': 'data:pickRestoreFile',
   'data:loadSeedData': 'data:loadSeedData',
   'data:removeSeedData': 'data:removeSeedData',
   'data:getDbPath': 'data:getDbPath',
