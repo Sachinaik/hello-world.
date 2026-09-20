@@ -1,0 +1,19 @@
+node_modules/
+out/
+dist/
+dist-electron/
+release/
+*.log
+npm-debug.log*
+.DS_Store
+.env
+.env.*
+coverage/
+*.local
+.vite/
+
+# App runtime data (SQLite files, backups) should never be committed
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+/userData/
